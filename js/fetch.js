@@ -1,8 +1,8 @@
 // Selection from the databse using latest 2018 asynchrous programming
 
 function loadData() {
-  try {
-    async function gettingData() {
+  async function gettingData() {
+    try {
       const fetchData = await fetch("php/load-table.php");
       const response = await fetchData.json();
       const tbody = document.querySelector("#tbody");
@@ -25,11 +25,10 @@ function loadData() {
         }
         tbody.innerHTML = tr;
       }
-    }
-    gettingData();
-  } catch (error) {
+    } catch (error) {}
     showMessage("error", "Can't Fetch Data");
   }
+  gettingData();
 }
 loadData();
 
@@ -238,6 +237,47 @@ function deleteRecord(id) {
     gettingData();
   }
 }
+// searching data
+function load_search() {
+  let searchVal = document.querySelector("#search").value;
+  if (searchVal === "") {
+    loadData();
+    return false;
+  } else {
+    async function gettingData() {
+      try {
+        const fetchData = await fetch(
+          `php/fetch-search.php?query=${searchVal}`
+        );
+        const response = await fetchData.json();
+        const tbody = document.querySelector("#tbody");
+        if (response["null"]) {
+          tbody.innerHTML =
+            "<tr><td colspan='6' align='center'><h3>NO Record Found!</h3></td></tr>";
+        } else {
+          let tr = "";
+          for (let item in response) {
+            tr += `
+              <tr>
+              <td align="center">${response[item].id}</td>
+              <td>${response[item].first_name}${response[item].last_name}</td>
+              <td>${response[item].class_name}</td>
+              <td>${response[item].city}</td>
+              <td align="center"><button class="edit-btn" onclick="editRecord(${response[item].id})">Edit</button></td>
+              <td align="center"><button class="delete-btn" onclick="deleteRecord(${response[item].id})">Delete</button></td>
+              </tr>
+              `;
+          }
+          tbody.innerHTML = tr;
+          showMessage("success", " searched Data Successfully");
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    gettingData();
+  }
+}
 
 // showing massaage
 function showMessage(type, text) {
@@ -259,4 +299,3 @@ function showMessage(type, text) {
 }
 
 showMessage();
-
